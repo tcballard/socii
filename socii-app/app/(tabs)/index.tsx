@@ -1,75 +1,196 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  SafeAreaView,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import { Heart, MessageCircle, Clock, Shield } from 'lucide-react-native';
+import { FeedHeader } from '@/components/FeedHeader';
+import { PostCard } from '@/components/PostCard';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+const { width } = Dimensions.get('window');
+
+// Mock data for development
+const mockPosts = [
+  {
+    id: '1',
+    user: {
+      name: 'Sarah Johnson',
+      avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
+      tier: 'Family'
+    },
+    content: "Just finished making homemade pizza with the kids! Messy kitchen but so worth it for these smiles. 🍕",
+    images: [
+      'https://images.pexels.com/photos/1566837/pexels-photo-1566837.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1260968/pexels-photo-1260968.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    timestamp: '2 hours ago',
+    likes: 12,
+    comments: 3,
+    liked: false,
+  },
+  {
+    id: '2',
+    user: {
+      name: 'Mike Chen',
+      avatar: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
+      tier: 'Close Friends'
+    },
+    content: "Weekend camping trip was exactly what we needed. No cell service, just quality time with the family.",
+    images: [
+      'https://images.pexels.com/photos/2662816/pexels-photo-2662816.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    timestamp: '1 day ago',
+    likes: 8,
+    comments: 5,
+    liked: true,
+  },
+  {
+    id: '3',
+    user: {
+      name: 'Emma Davis',
+      avatar: 'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=2',
+      tier: 'Family'
+    },
+    content: "First day of school pictures! Can't believe how fast they're growing up. Time really does fly when you're raising little humans.",
+    images: [
+      'https://images.pexels.com/photos/1720186/pexels-photo-1720186.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1454360/pexels-photo-1454360.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1462630/pexels-photo-1462630.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    timestamp: '3 days ago',
+    likes: 24,
+    comments: 8,
+    liked: false,
+  }
+];
 
 export default function HomeScreen() {
+  const [refreshing, setRefreshing] = useState(false);
+  const [posts, setPosts] = useState(mockPosts);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    // Simulate refresh delay
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 1000);
+  }, []);
+
+  const handleLike = (postId: string) => {
+    setPosts(prevPosts =>
+      prevPosts.map(post =>
+        post.id === postId
+          ? {
+              ...post,
+              liked: !post.liked,
+              likes: post.liked ? post.likes - 1 : post.likes + 1
+            }
+          : post
+      )
+    );
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="dark" />
+      <FeedHeader />
+      
+      <ScrollView
+        style={styles.feed}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#6B9BD2']}
+            tintColor="#6B9BD2"
+          />
+        }
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.algorithmBanner}>
+          <Shield size={16} color="#7DB46C" strokeWidth={2} />
+          <Text style={styles.algorithmText}>
+            No algorithm here - just real moments from people who matter
+          </Text>
+        </View>
+
+        {posts.map((post) => (
+          <PostCard
+            key={post.id}
+            post={post}
+            onLike={() => handleLike(post.id)}
+          />
+        ))}
+
+        <View style={styles.endOfFeed}>
+          <Text style={styles.endOfFeedText}>You're all caught up!</Text>
+          <Text style={styles.endOfFeedSubtext}>
+            No more posts from your connections right now
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#F8FAFC',
+  },
+  feed: {
+    flex: 1,
+  },
+  algorithmBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    backgroundColor: '#F0F9FF',
+    marginHorizontal: 16,
+    marginTop: 8,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E0F2FE',
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  algorithmText: {
+    fontSize: 13,
+    color: '#0F766E',
+    fontWeight: '500',
+    marginLeft: 8,
+    flex: 1,
+    fontFamily: 'Inter-Medium',
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  errorBanner: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#FECACA',
+  },
+  errorText: {
+    color: '#DC2626',
+  },
+  endOfFeed: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    paddingHorizontal: 16,
+  },
+  endOfFeedText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6B7280',
+    fontFamily: 'Inter-SemiBold',
+  },
+  endOfFeedSubtext: {
+    fontSize: 14,
+    color: '#9CA3AF',
+    marginTop: 4,
+    textAlign: 'center',
+    fontFamily: 'Inter-Regular',
   },
 });
