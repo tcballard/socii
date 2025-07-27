@@ -115,6 +115,7 @@ export interface PostForm {
 export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
+  CreatePost: undefined;
   PostDetail: { postId: string };
   ConnectionDetail: { connectionId: string };
   Settings: undefined;

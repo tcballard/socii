@@ -9,7 +9,12 @@ import { RootStackParamList, AuthStackParamList, MainTabParamList } from '../../
 
 // Screens
 import LoginScreen from '../../screens/auth/LoginScreen';
+import RegisterScreen from '../../screens/auth/RegisterScreen';
 import FeedScreen from '../../screens/feed/FeedScreen';
+import CreatePostScreen from '../../screens/feed/CreatePostScreen';
+import ConnectionsScreen from '../../screens/connections/ConnectionsScreen';
+import ProfileScreen from '../../screens/profile/ProfileScreen';
+import SettingsScreen from '../../screens/settings/SettingsScreen';
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -20,6 +25,8 @@ const AuthNavigator = () => {
   return (
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
+      <AuthStack.Screen name="Register" component={RegisterScreen} />
+      <AuthStack.Screen name="ForgotPassword" component={LoginScreen} />
     </AuthStack.Navigator>
   );
 };
@@ -62,12 +69,12 @@ const MainNavigator = () => {
       />
       <MainTab.Screen 
         name="Connections" 
-        component={FeedScreen} // Placeholder for now
+        component={ConnectionsScreen}
         options={{ tabBarLabel: 'Connections' }}
       />
       <MainTab.Screen 
         name="Profile" 
-        component={FeedScreen} // Placeholder for now
+        component={ProfileScreen}
         options={{ tabBarLabel: 'Profile' }}
       />
     </MainTab.Navigator>
@@ -91,7 +98,15 @@ const AppNavigator: React.FC = () => {
     <NavigationContainer>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
-          <RootStack.Screen name="Main" component={MainNavigator} />
+          <>
+            <RootStack.Screen name="Main" component={MainNavigator} />
+            <RootStack.Screen 
+              name="CreatePost" 
+              component={CreatePostScreen}
+              options={{ presentation: 'modal' }}
+            />
+            <RootStack.Screen name="Settings" component={SettingsScreen} />
+          </>
         ) : (
           <RootStack.Screen name="Auth" component={AuthNavigator} />
         )}
